@@ -3,7 +3,7 @@ import logging
 import io
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -52,3 +52,26 @@ class URL:
         assert "content-encoding" not in response_headers
         content: str = response.read()
         return content
+
+
+def show(body: str):
+    in_tag: bool = False
+
+    for c in body:
+        if c == "<":
+            in_tag = True
+        elif c == ">":
+            in_tag = False
+        elif not in_tag:
+            print(c, end="")
+
+
+def load(url: URL):
+    body: str = url.request()
+    show(body=body)
+
+
+if __name__ == "__main__":
+    import sys
+
+    load(URL(sys.argv[1]))
