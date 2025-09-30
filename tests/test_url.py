@@ -1,7 +1,6 @@
 import unittest
-import socket
 import io
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from src.main import URL
 
@@ -27,17 +26,16 @@ class TestUrl(unittest.TestCase):
         url: URL = URL(url_str)
         self.assertEqual(url.path, "/", "Fails to append endig /")
 
-    @patch('socket.socket')
+    @patch("socket.socket")
     def test_request(self, mock_socket):
         mock_socket_instance = mock_socket.return_value
         mock_socket_instance.send.return_value = 5
-        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 5\r\n\r\nhello\r\n""" 
+        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 5\r\n\r\nhello\r\n"""
         mock_socket_instance.makefile.return_value = io.StringIO(return_mock_response)
         url_str: str = "http://test.com"
         url: URL = URL(url_str)
         content: str = url.request()
         self.assertEqual(content.strip(), "hello")
-
 
 
 if __name__ == "__main__":
