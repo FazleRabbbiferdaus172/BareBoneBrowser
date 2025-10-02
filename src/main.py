@@ -1,7 +1,7 @@
-import socket
-import logging
 import io
-
+import logging
+import socket
+import ssl
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ class URL:
         self.host: str
         self.path: str
         self.port: int
-        
+
         self.scheme, url = url.split("://", 1)
         assert self.scheme in ["http", "https"]
 
@@ -36,6 +36,11 @@ class URL:
             family=socket.AF_INET, type=socket.SOCK_STREAM, proto=socket.IPPROTO_TCP
         )
         s.connect((self.host, self.port))
+
+        if self.scheme == "https":
+            ctx = ssl.create_default_context()
+            s = ctx.wrap_socket(s, self.host)
+
         request: str
         request = "GET {} HTTP/1.0\r\n".format(self.path)
         request += "Host: {}\r\n".format(self.host)
