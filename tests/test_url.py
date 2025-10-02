@@ -21,6 +21,26 @@ class TestUrl(unittest.TestCase):
             url_1.path, "/test", f"Expected path should be /test, got {url_1.path}"
         )
 
+    def test_port_number_is_correctly_indentified(self):
+        url_http_str: str = "http://test.com"
+        url_https_str: str = "https://test.com"
+        url_http_port_str: str = "http://test.com:8000"
+        url_https_port_str: str = "https://test.com:8000"
+
+        url: URL
+        
+        url = URL(url_http_str)
+        self.assertEqual(url.port, 80)
+
+        url = URL(url_http_port_str)
+        self.assertEqual(url.port, 8000)
+
+        url = URL(url_https_str)
+        self.assertEqual(url.port, 443)
+
+        url = URL(url_https_port_str)
+        self.assertEqual(url.port, 8000)
+
     def test_correctly_append_ending_slash(self):
         url_str: str = "http://test.com"
         url: URL = URL(url_str)
