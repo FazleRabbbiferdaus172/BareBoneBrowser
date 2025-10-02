@@ -1,6 +1,7 @@
 import unittest
 import io
-from unittest.mock import patch
+import ssl
+from unittest.mock import patch, MagicMock
 
 from src.main import URL
 
@@ -47,7 +48,7 @@ class TestUrl(unittest.TestCase):
         self.assertEqual(url.path, "/", "Fails to append endig /")
 
     @patch("socket.socket")
-    def test_request(self, mock_socket):
+    def test_http_request(self, mock_socket):
         mock_socket_instance = mock_socket.return_value
         mock_socket_instance.send.return_value = 5
         return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 5\r\n\r\nhello\r\n"""
@@ -57,6 +58,23 @@ class TestUrl(unittest.TestCase):
         content: str = url.request()
         self.assertEqual(content.strip(), "hello")
 
+    @patch("socket.socket")
+    @patch("ssl.create_default_context")
+    def test_https_request(self, mock_create_default_context, mock_socket):
+        mock_socket_instance = mock_socket.return_value
+        mock_socket_instance.send.return_value = 5
+        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 5\r\n\r\nhello\r\n"""
+        mock_socket_instance.makefile.return_value = io.StringIO(return_mock_response)
+
+        mock_context_attrs = {"wrap_socket.return_value": mock_socket_instance}
+        mock_context = MagicMock(**mock_context_attrs)
+        mock_create_default_context.return_value = mock_context
+        url_str: str = "https://test.com"
+        url: URL = URL(url_str)
+        content: str = url.request()
+        mock_create_default_context.assert_called_once()
+        mock_create_default_context.return_value.wrap_socket.assert_called_once()
+        self.assertEqual(content.strip(), "hello")
 
 if __name__ == "__main__":
     unittest.main()
