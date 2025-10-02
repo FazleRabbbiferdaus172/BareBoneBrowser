@@ -11,6 +11,9 @@ class URL:
     def __init__(self, url: str):
         self.scheme: str
         self.host: str
+        self.path: str
+        self.port: int
+        
         self.scheme, url = url.split("://", 1)
         assert self.scheme in ["http", "https"]
 
@@ -19,10 +22,14 @@ class URL:
 
         self.host, url = url.split("/", 1)
         self.path = "/" + url
-        if self.scheme == "http":
-            self.port = 80
-        elif self.scheme == "https":
-            self.port = 443
+        if ":" in self.host:
+            self.host, port = self.host.split(":", 1)
+            self.port = int(port)
+        else:
+            if self.scheme == "http":
+                self.port = 80
+            elif self.scheme == "https":
+                self.port = 443
 
     def request(self) -> str:
         s: socket.socket = socket.socket(
