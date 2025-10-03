@@ -44,6 +44,8 @@ class URL:
         request: str
         request = "GET {} HTTP/1.0\r\n".format(self.path)
         request += "Host: {}\r\n".format(self.host)
+        request += "User-Agent: BareBoneBrowser/0.1\r\n"
+        request += "Connection: close\r\n"
         request += "\r\n"
         logger.debug(f"Request string: \n {request}")
         s.send(request.encode("utf8"))
