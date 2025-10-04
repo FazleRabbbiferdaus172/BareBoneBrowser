@@ -31,7 +31,29 @@ class URL:
             elif self.scheme == "https":
                 self.port = 443
 
-    def request(self) -> str:
+        self.default_headers : dict[str, str] = {"Host": self.host, "User-Agent": "BareBoneBrowser/0.1", "Connection": "close"}
+
+    def request(self, use_default_headres: bool = True, request_headers: dict[str, str] | None = None) -> str:
+        """
+        Make an HTTP request and return the response body as a string.
+        param use_default_headres: Whether to use the default headers defined in the URL instance.
+        param request_headers: Additional headers to include in the request.
+
+        returns a sting of response body.
+        """
+        def generate_headers() -> str:
+            """Generate the HTTP headers for the request."""
+            headers: dict[str, str] = {}
+            if use_default_headres:
+                headers.update(self.default_headers)
+            if request_headers is not None:
+                headers.update(request_headers)
+            headers_str: str = ""
+            for header, value in headers.items():
+                headers_str += f"{header}: {value}\r\n"
+            headers_str += "\r\n"
+            return headers_str
+
         s: socket.socket = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_STREAM, proto=socket.IPPROTO_TCP
         )
@@ -43,9 +65,7 @@ class URL:
 
         request: str
         request = "GET {} HTTP/1.0\r\n".format(self.path)
-        request += "Host: {}\r\n".format(self.host)
-        request += "User-Agent: BareBoneBrowser/0.1\r\n"
-        request += "Connection: close\r\n"
+        request += generate_headers()
         request += "\r\n"
         logger.debug(f"Request string: \n {request}")
         s.send(request.encode("utf8"))
@@ -73,6 +93,7 @@ class URL:
 
 
 def show(body: str):
+    """A very naive HTML renderer that strips out HTML tags and prints the text content."""
     in_tag: bool = False
 
     for c in body:
@@ -85,6 +106,7 @@ def show(body: str):
 
 
 def load(url: URL):
+    """Load a URL and display its content."""
     body: str = url.request()
     show(body=body)
 
