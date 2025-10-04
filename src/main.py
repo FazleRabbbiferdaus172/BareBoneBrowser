@@ -10,13 +10,18 @@ logger = logging.getLogger(__name__)
 class URL:
     def __init__(self, url: str):
         self.scheme: str
+        self.scheme, url = url.split("://", 1)
+        assert self.scheme in ["http", "https", "file"]
+        if self.scheme in ["http", "https"]:
+            self._process_http_url(url)
+        elif self.scheme == "file":
+            self._process_file_url(url)
+
+    def _process_http_url(self, url):
+        """Process an HTTP or HTTPS URL."""
         self.host: str
         self.path: str
         self.port: int
-
-        self.scheme, url = url.split("://", 1)
-        assert self.scheme in ["http", "https"]
-
         if "/" not in url:
             url += "/"
 
@@ -33,6 +38,10 @@ class URL:
 
         self.default_headers : dict[str, str] = {"Host": self.host, "User-Agent": "BareBoneBrowser/0.1", "Connection": "close"}
 
+    def _process_file_url(self, url):
+        """Process a file URL."""
+        self.path = url
+
     def request(self, use_default_headres: bool = True, request_headers: dict[str, str] | None = None) -> str:
         """
         Make an HTTP request and return the response body as a string.
@@ -41,6 +50,7 @@ class URL:
 
         returns a sting of response body.
         """
+
         def generate_headers() -> str:
             """Generate the HTTP headers for the request."""
             headers: dict[str, str] = {}
@@ -90,7 +100,11 @@ class URL:
         assert "content-encoding" not in response_headers
         content: str = response.read()
         return content
-
+    
+    def load_file(self) -> str:
+        """Load a file and return its content as a string."""
+        with open(self.path, "r", encoding="utf8") as f:
+            return f.read()
 
 def show(body: str):
     """A very naive HTML renderer that strips out HTML tags and prints the text content."""
@@ -107,7 +121,10 @@ def show(body: str):
 
 def load(url: URL):
     """Load a URL and display its content."""
-    body: str = url.request()
+    if url.scheme == "file":
+        body: str = url.load_file()
+    elif url.scheme in ["http", "https"]:
+        body: str = url.request()
     show(body=body)
 
 
