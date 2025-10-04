@@ -2,13 +2,18 @@ import io
 import logging
 import socket
 import ssl
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+DEFAULT_FILE_URL = "file://" + os.path.abspath(os.path.join("tests", "test.html"))
 
 
 class URL:
-    def __init__(self, url: str):
+    def __init__(self, url: str | None = None):
+        if url is None:
+            url = DEFAULT_FILE_URL
+
         self.scheme: str
         self.scheme, url = url.split("://", 1)
         assert self.scheme in ["http", "https", "file"]
@@ -130,5 +135,7 @@ def load(url: URL):
 
 if __name__ == "__main__":
     import sys
-
-    load(URL(sys.argv[1]))
+    if len(sys.argv) < 2:
+        load(URL())
+    else:
+        load(URL(sys.argv[1]))
