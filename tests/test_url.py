@@ -1,7 +1,6 @@
-import unittest
 import io
-import ssl
-from unittest.mock import patch, MagicMock
+import unittest
+from unittest.mock import MagicMock, patch
 
 from src.main import URL
 
@@ -29,7 +28,7 @@ class TestUrl(unittest.TestCase):
         url_https_port_str: str = "https://test.com:8000"
 
         url: URL
-        
+
         url = URL(url_http_str)
         self.assertEqual(url.port, 80)
 
@@ -90,6 +89,25 @@ class TestUrl(unittest.TestCase):
         decodded_request_list: list[str] = send_method_args.decode("utf8").split("\r\n")
         self.assertIn("User-Agent: BareBoneBrowser/0.1", decodded_request_list)
         self.assertIn("Connection: close", decodded_request_list)
+
+    @patch("socket.socket")
+    def test_request_headres_replaces_deault_headers(self, mock_socket):
+        mock_socket_instance = mock_socket.return_value
+        mock_socket_instance.send.return_value = 5
+        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 5\r\n\r\nhello\r\n"""
+        mock_socket_instance.makefile.return_value = io.StringIO(return_mock_response)
+
+        url_str: str = "http://test.com"
+        url: URL = URL(url_str)
+        custom_headers: dict[str, str] = {
+            "User-Agent": "TEST",
+        }
+        url.request(request_headers=custom_headers)
+        send_method_args = mock_socket_instance.send.call_args.args[0]
+        decodded_request_list: list[str] = send_method_args.decode("utf8").split("\r\n")
+        self.assertIn("User-Agent: TEST", decodded_request_list)
+        self.assertIn("Host: test.com", decodded_request_list)
+
 
 if __name__ == "__main__":
     unittest.main()
