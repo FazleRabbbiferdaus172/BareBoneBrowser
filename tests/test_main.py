@@ -21,3 +21,9 @@ class TestMain(unittest.TestCase):
         load(url)
         self.assertEqual(mock_stdout.getvalue(), "Test")
 
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_entities_support(self, mock_stdout):
+        content = "&lt;&lt;&lt;&gt;&gt;&gt;"
+        show(content)
+        self.assertEqual(mock_stdout.getvalue(), "<<<>>>")
+
