@@ -15,12 +15,14 @@ class URL:
             url = DEFAULT_FILE_URL
 
         self.scheme: str
-        self.scheme, url = url.split("://", 1)
-        assert self.scheme in ["http", "https", "file"]
+        self.scheme, url = url.split(":", 1)
+        assert self.scheme in ["http", "https", "file", "data"]
         if self.scheme in ["http", "https"]:
-            self._process_http_url(url)
+            self._process_http_url(url[2:])
         elif self.scheme == "file":
-            self._process_file_url(url)
+            self._process_file_url(url[2:])
+        elif self.scheme == "data":
+            self._process_data_url(url)
 
     def _process_http_url(self, url):
         """Process an HTTP or HTTPS URL."""
@@ -46,6 +48,12 @@ class URL:
     def _process_file_url(self, url):
         """Process a file URL."""
         self.path = url
+
+    def _process_data_url(self, url):
+        """Process a data URL."""
+        self._content_type: str
+        self._content: str
+        self._content_type, self._content = url.split(",", 1)
 
     def request(self, use_default_headres: bool = True, request_headers: dict[str, str] | None = None) -> str:
         """
@@ -111,6 +119,12 @@ class URL:
         with open(self.path, "r", encoding="utf8") as f:
             return f.read()
 
+    def load_data(self) -> str:
+        """Load a data URL and return its content as a string."""
+        logger.debug(f"Data URL content type: {self._content_type}")
+        logger.debug(f"Data URL content: {self._content}")
+        return self._content_type, self._content
+
 def show(body: str):
     """A very naive HTML renderer that strips out HTML tags and prints the text content."""
     in_tag: bool = False
@@ -130,6 +144,9 @@ def load(url: URL):
         body: str = url.load_file()
     elif url.scheme in ["http", "https"]:
         body: str = url.request()
+    elif url.scheme == "data":
+        content_type, body = url.load_data()
+        logger.debug(f"Data URL content type: {content_type}")
     show(body=body)
 
 
