@@ -1,12 +1,13 @@
 import io
 import logging
+import os
 import socket
 import ssl
-import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 DEFAULT_FILE_URL = "file://" + os.path.abspath(os.path.join("tests", "test.html"))
+ENTITY_MAPPING = {"&lt;": "<", "&gt;": ">"}
 
 
 class URL:
@@ -43,7 +44,11 @@ class URL:
             elif self.scheme == "https":
                 self.port = 443
 
-        self.default_headers : dict[str, str] = {"Host": self.host, "User-Agent": "BareBoneBrowser/0.1", "Connection": "close"}
+        self.default_headers: dict[str, str] = {
+            "Host": self.host,
+            "User-Agent": "BareBoneBrowser/0.1",
+            "Connection": "close",
+        }
 
     def _process_file_url(self, url):
         """Process a file URL."""
@@ -55,7 +60,11 @@ class URL:
         self._content: str
         self._content_type, self._content = url.split(",", 1)
 
-    def request(self, use_default_headres: bool = True, request_headers: dict[str, str] | None = None) -> str:
+    def request(
+        self,
+        use_default_headres: bool = True,
+        request_headers: dict[str, str] | None = None,
+    ) -> str:
         """
         Make an HTTP request and return the response body as a string.
         param use_default_headres: Whether to use the default headers defined in the URL instance.
@@ -113,7 +122,7 @@ class URL:
         assert "content-encoding" not in response_headers
         content: str = response.read()
         return content
-    
+
     def load_file(self) -> str:
         """Load a file and return its content as a string."""
         with open(self.path, "r", encoding="utf8") as f:
@@ -125,17 +134,29 @@ class URL:
         logger.debug(f"Data URL content: {self._content}")
         return self._content_type, self._content
 
+
 def show(body: str):
     """A very naive HTML renderer that strips out HTML tags and prints the text content."""
     in_tag: bool = False
-
-    for c in body:
-        if c == "<":
+    i = 0
+    while i < len(body):
+        if body[i] == "<":
             in_tag = True
-        elif c == ">":
+        elif body[i] == ">":
             in_tag = False
         elif not in_tag:
-            print(c, end="")
+            if body[i] == "&":
+                try:
+                    entitty_ening_index = body.index(";", i)
+                    entity = body[i : entitty_ening_index + 1]
+                    print(ENTITY_MAPPING[entity], end="")
+                    i = entitty_ening_index + 1
+                    continue
+                except ValueError:
+                    print(body[i], end="")
+            else:
+                print(body[i], end="")
+        i += 1
 
 
 def load(url: URL):
@@ -152,6 +173,7 @@ def load(url: URL):
 
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) < 2:
         load(URL())
     else:
