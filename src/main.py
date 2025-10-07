@@ -56,9 +56,9 @@ class URL:
 
     def _process_data_url(self, url):
         """Process a data URL."""
-        self._content_type: str
+        self._mime_type: str
         self._content: str
-        self._content_type, self._content = url.split(",", 1)
+        self._mime_type, self._content = url.split(",", 1)
 
     def request(
         self,
@@ -130,9 +130,9 @@ class URL:
 
     def load_data(self) -> str:
         """Load a data URL and return its content as a string."""
-        logger.debug(f"Data URL content type: {self._content_type}")
+        logger.debug(f"Data URL content type: {self._mime_type}")
         logger.debug(f"Data URL content: {self._content}")
-        return self._content_type, self._content
+        return self._mime_type, self._content
 
 
 def show(body: str):
