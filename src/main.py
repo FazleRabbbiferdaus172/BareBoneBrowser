@@ -8,6 +8,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 DEFAULT_FILE_URL = "file://" + os.path.abspath(os.path.join("tests", "test.html"))
 ENTITY_MAPPING = {"&lt;": "<", "&gt;": ">"}
+Hierarchical_URL_SCHEMES = ["http", "https", "file"]
+OPAQUE_URL_SCHEMES = ["data"]
 
 
 class URL:
@@ -17,13 +19,24 @@ class URL:
 
         self.scheme: str
         self.scheme, url = url.split(":", 1)
-        assert self.scheme in ["http", "https", "file", "data"]
+        assert self.scheme in Hierarchical_URL_SCHEMES + OPAQUE_URL_SCHEMES
+        if self.scheme in Hierarchical_URL_SCHEMES:
+            self._process_hierarchical_url(url)
+        elif self.scheme in OPAQUE_URL_SCHEMES:
+            self.__process_opaque_url(url)
+
+    def _process_hierarchical_url(self, url):
+        """Process a hierarchical URL."""
         if self.scheme in ["http", "https"]:
             self._process_http_url(url[2:])
         elif self.scheme == "file":
             self._process_file_url(url[2:])
-        elif self.scheme == "data":
+    
+    def __process_opaque_url(self, url):
+        """Process an opaque URL."""
+        if self.scheme == "data":
             self._process_data_url(url)
+        
 
     def _process_http_url(self, url):
         """Process an HTTP or HTTPS URL."""
