@@ -108,6 +108,34 @@ class TestUrl(unittest.TestCase):
         self.assertIn("User-Agent: TEST", decodded_request_list)
         self.assertIn("Host: test.com", decodded_request_list)
 
+    @patch.object(URL, "_request", return_value="<html>test</html>")
+    def test_view_source_url(self, mock_request):
+        url_str: str = "view-source:http://test.com"
+        url: URL = URL(url_str)
+        self.assertEqual(
+            url.scheme, "view-source", f"Expected scheme should be view-source, got {url.scheme}"
+        )
+        self.assertEqual(
+            url.view_source_url.scheme,
+            "http",
+            f"Expected scheme should be http, got {url.view_source_url.scheme}",
+        )
+        self.assertEqual(
+            url.view_source_url.host,
+            "test.com",
+            f"Expected host should be test.com, got {url.view_source_url.host}",
+        )
+        self.assertEqual(
+            url.view_source_url.path,
+            "/",
+            f"Expected path should be /, got {url.view_source_url.path}",
+        )
+        content: str = url.request()
+        self.assertEqual(
+            content,
+            "&lt;html&gt;test&lt;/html&gt;",
+            f"Expected content should be &lt;html&gt;test&lt;/html&gt;, got {content}",
+        )
 
 if __name__ == "__main__":
     unittest.main()

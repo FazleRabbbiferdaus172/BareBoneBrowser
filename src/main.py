@@ -4,12 +4,12 @@ import os
 import socket
 import ssl
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-DEFAULT_FILE_URL = "file://" + os.path.abspath(os.path.join("tests", "test.html"))
-ENTITY_MAPPING = {"&lt;": "<", "&gt;": ">"}
-Hierarchical_URL_SCHEMES = ["http", "https", "file"]
-OPAQUE_URL_SCHEMES = ["data"]
+DEFAULT_FILE_URL: str = "file://" + os.path.abspath(os.path.join("tests", "test.html"))
+ENTITY_MAPPING: dict[str, str] = {"&lt;": "<", "&gt;": ">"}
+Hierarchical_URL_SCHEMES: list[str] = ["http", "https", "file"]
+OPAQUE_URL_SCHEMES: list[str] = ["data", "view-source"]
 
 
 class URL:
@@ -23,7 +23,7 @@ class URL:
         if self.scheme in Hierarchical_URL_SCHEMES:
             self._process_hierarchical_url(url)
         elif self.scheme in OPAQUE_URL_SCHEMES:
-            self.__process_opaque_url(url)
+            self._process_opaque_url(url)
 
     def _process_hierarchical_url(self, url):
         """Process a hierarchical URL."""
@@ -32,12 +32,13 @@ class URL:
         elif self.scheme == "file":
             self._process_file_url(url[2:])
     
-    def __process_opaque_url(self, url):
+    def _process_opaque_url(self, url):
         """Process an opaque URL."""
         if self.scheme == "data":
             self._process_data_url(url)
+        elif self.scheme == "view-source":
+            self._process_view_source_url(url)
         
-
     def _process_http_url(self, url):
         """Process an HTTP or HTTPS URL."""
         self.host: str
@@ -73,7 +74,11 @@ class URL:
         self._content: str
         self._mime_type, self._content = url.split(",", 1)
 
-    def request(
+    def _process_view_source_url(self, url):
+        """Process a view-source URL."""
+        self.view_source_url = URL(url)
+
+    def _request(
         self,
         use_default_headres: bool = True,
         request_headers: dict[str, str] | None = None,
@@ -106,7 +111,7 @@ class URL:
 
         if self.scheme == "https":
             ctx = ssl.create_default_context()
-            s = ctx.wrap_socket(s, self.host)
+            s = ctx.wrap_socket(s, server_hostname=self.host)
 
         request: str
         request = "GET {} HTTP/1.0\r\n".format(self.path)
@@ -134,6 +139,20 @@ class URL:
         assert "transfer-encoding" not in response_headers
         assert "content-encoding" not in response_headers
         content: str = response.read()
+        return content
+
+    def request(self, use_default_headres: bool = True, request_headers: dict[str, str] | None = None,):
+        content: str = ""
+        if self.scheme == "view-source":
+            content = self._replace_with_enities(self.view_source_url._request(use_default_headres, request_headers))
+        else:
+            content = self._request(use_default_headres, request_headers)
+        return content
+    
+    def _replace_with_enities(self, content: str) -> str:
+        """Replace special characters with their corresponding HTML entities."""
+        for entity, char in ENTITY_MAPPING.items():
+            content = content.replace(char, entity)
         return content
 
     def load_file(self) -> str:
@@ -176,7 +195,7 @@ def load(url: URL):
     """Load a URL and display its content."""
     if url.scheme == "file":
         body: str = url.load_file()
-    elif url.scheme in ["http", "https"]:
+    elif url.scheme in ["http", "https", "view-source"]:
         body: str = url.request()
     elif url.scheme == "data":
         content_type, body = url.load_data()
