@@ -27,3 +27,6 @@ class TestMain(unittest.TestCase):
         show(content)
         self.assertEqual(mock_stdout.getvalue(), "<<<>>>")
 
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
+
