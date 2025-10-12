@@ -3,9 +3,14 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from src.main import URL
+from src.cache.connection_cache import ConnectionCache
 
 
 class TestUrl(unittest.TestCase):
+    def setUp(self) -> None:
+        self.connetction_cache = ConnectionCache()
+        self.connetction_cache._connections.clear()
+    
     def test_scheme_host_path(self):
         url_1_str: str = "http://test.com/test"
         url_1: URL = URL(url_1_str)
@@ -50,7 +55,7 @@ class TestUrl(unittest.TestCase):
     def test_http_request(self, mock_socket):
         mock_socket_instance = mock_socket.return_value
         mock_socket_instance.send.return_value = 5
-        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 5\r\n\r\nhello\r\n"""
+        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 62\r\n\r\nhello\r\n""".encode("utf-8")
         mock_socket_instance.makefile.return_value = io.StringIO(return_mock_response)
         url_str: str = "http://test.com"
         url: URL = URL(url_str)
@@ -62,7 +67,7 @@ class TestUrl(unittest.TestCase):
     def test_https_request(self, mock_create_default_context, mock_socket):
         mock_socket_instance = mock_socket.return_value
         mock_socket_instance.send.return_value = 5
-        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 5\r\n\r\nhello\r\n"""
+        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 62\r\n\r\nhello\r\n""".encode("utf-8")
         mock_socket_instance.makefile.return_value = io.StringIO(return_mock_response)
 
         mock_context_attrs = {"wrap_socket.return_value": mock_socket_instance}
@@ -80,14 +85,14 @@ class TestUrl(unittest.TestCase):
     def test_http_request_has_content_and_user_agent_headers(self, mock_socket):
         mock_socket_instance = mock_socket.return_value
         mock_socket_instance.send.return_value = 5
-        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 5\r\n\r\nhello\r\n"""
+        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 62\r\n\r\nhello\r\n""".encode("utf-8")
         mock_socket_instance.makefile.return_value = io.StringIO(return_mock_response)
 
         url_str: str = "http://test.com"
         url: URL = URL(url_str)
         url.request()
         send_method_args = mock_socket_instance.send.call_args.args[0]
-        decodded_request_list: list[str] = send_method_args.decode("utf8").split("\r\n")
+        decodded_request_list: list[str] = send_method_args.decode("utf-8").split("\r\n")
         self.assertIn("User-Agent: BareBoneBrowser/0.1", decodded_request_list)
         self.assertIn("Connection: close", decodded_request_list)
 
@@ -95,7 +100,7 @@ class TestUrl(unittest.TestCase):
     def test_request_headres_replaces_deault_headers(self, mock_socket):
         mock_socket_instance = mock_socket.return_value
         mock_socket_instance.send.return_value = 5
-        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 5\r\n\r\nhello\r\n"""
+        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 62\r\n\r\nhello\r\n""".encode("utf-8")
         mock_socket_instance.makefile.return_value = io.StringIO(return_mock_response)
 
         url_str: str = "http://test.com"
@@ -105,7 +110,7 @@ class TestUrl(unittest.TestCase):
         }
         url.request(request_headers=custom_headers)
         send_method_args = mock_socket_instance.send.call_args.args[0]
-        decodded_request_list: list[str] = send_method_args.decode("utf8").split("\r\n")
+        decodded_request_list: list[str] = send_method_args.decode("utf-8").split("\r\n")
         self.assertIn("User-Agent: TEST", decodded_request_list)
         self.assertIn("Host: test.com", decodded_request_list)
 
@@ -142,13 +147,18 @@ class TestUrl(unittest.TestCase):
     def test_sockets_are_reused_when_possible(self, mock_socket):
         mock_socket_instance = mock_socket.return_value
         mock_socket_instance.send.return_value = 5
-        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 5\r\n\r\nhello\r\n"""
+        return_mock_response = """HTTP/1.0 200 ok\r\nHost: test.com\r\nContent-Lenght: 62\r\n\r\nhello\r\n""".encode("utf-8")
         mock_socket_instance.makefile.return_value = io.StringIO(return_mock_response)
 
         url_str: str = "http://test.com"
         url: URL = URL(url_str)
         url.request()
-        self.assertEqual(len(mock_socket.mock_calls), 1)
+
+        mock_socket_instance.makefile.return_value = io.StringIO(return_mock_response)
+        url_str: str = "http://test.com"
+        url: URL = URL(url_str)
+        url.request()
+        self.assertEqual(mock_socket.call_count, 1)
 
 
 if __name__ == "__main__":
