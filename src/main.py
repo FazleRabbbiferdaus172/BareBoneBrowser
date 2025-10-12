@@ -4,6 +4,8 @@ import os
 import socket
 import ssl
 
+from src.cache.connection_cache import ConnectionCache
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 DEFAULT_FILE_URL: str = "file://" + os.path.abspath(os.path.join("tests", "test.html"))
@@ -61,7 +63,8 @@ class URL:
         self.default_headers: dict[str, str] = {
             "Host": self.host,
             "User-Agent": "BareBoneBrowser/0.1",
-            "Connection": "close",
+            # "Connection": "close",
+            "Connection": "keep-alive",
         }
 
     def _process_file_url(self, url):
@@ -103,33 +106,38 @@ class URL:
                 headers_str += f"{header}: {value}\r\n"
             headers_str += "\r\n"
             return headers_str
+        
+        connection_cache: ConnectionCache  = ConnectionCache()
+        s : socket.socket | None = connection_cache.get(self.host)
+        if s is None:
+            s = socket.socket(
+                family=socket.AF_INET, type=socket.SOCK_STREAM, proto=socket.IPPROTO_TCP
+            )
+            s.connect((self.host, self.port))
 
-        s: socket.socket = socket.socket(
-            family=socket.AF_INET, type=socket.SOCK_STREAM, proto=socket.IPPROTO_TCP
-        )
-        s.connect((self.host, self.port))
+            if self.scheme == "https":
+                ctx = ssl.create_default_context()
+                s = ctx.wrap_socket(s, server_hostname=self.host)
 
-        if self.scheme == "https":
-            ctx = ssl.create_default_context()
-            s = ctx.wrap_socket(s, server_hostname=self.host)
+            connection_cache.set(self.host, s)
 
         request: str
         request = "GET {} HTTP/1.0\r\n".format(self.path)
         request += generate_headers()
         request += "\r\n"
         logger.debug(f"Request string: \n {request}")
-        s.send(request.encode("utf8"))
+        s.send(request.encode("utf-8"))
 
         # makefile returns a file-like object containing every byte we receive from the server
-        response: io.TextIOWrapper = s.makefile("r", encoding="utf8", newline="\r\n")
+        response: io.TextIOWrapper = s.makefile("rb", encoding="utf-8", newline="\r\n")
         statusline: str = response.readline()
         version: str
         status: str
         explanation: str
-        version, status, explanation = statusline.split(" ", 2)
+        version, status, explanation = statusline.decode('utf-8').split(" ", 2)
         response_headers: dict = {}
         while True:
-            line: str = response.readline()
+            line: str = response.readline().decode('utf-8')
             if line == "\r\n":
                 break
             header: str
@@ -138,7 +146,11 @@ class URL:
             response_headers[header] = value.strip()
         assert "transfer-encoding" not in response_headers
         assert "content-encoding" not in response_headers
-        content: str = response.read()
+        content: str = ""
+        if 'Content-Length' in response_headers:
+            content = response.read(int(response_headers['Content-Length'])).decode('utf-8')
+        else:
+            content = response.read(int(response_headers['Content-Length'])).decode('utf-8')
         return content
 
     def request(self, use_default_headres: bool = True, request_headers: dict[str, str] | None = None,):
@@ -157,7 +169,7 @@ class URL:
 
     def load_file(self) -> str:
         """Load a file and return its content as a string."""
-        with open(self.path, "r", encoding="utf8") as f:
+        with open(self.path, "r", encoding="utf-8") as f:
             return f.read()
 
     def load_data(self) -> str:

@@ -12,14 +12,19 @@ class ConnectionCache(Singleton):
     def set(self, host_name: str, sc : socket.socket):
         self._connections[host_name] = sc
 
+    def _close_socket(self, host_name):
+        self._connections[host_name].close()
+
     def remove(self, host_name: str):
         if host_name in self._connections:
+            self._close_socket(host_name)
             del self._connections[host_name]
             return True
         return False
 
     def invalidate_cache(self, host_name: str):
         if host_name in self._connections:
+            self._close_socket(host_name)
             del self._connections[host_name]
             return True
         return False
