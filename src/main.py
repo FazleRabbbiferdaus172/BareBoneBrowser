@@ -13,6 +13,7 @@ DEFAULT_FILE_URL: str = "file://" + os.path.abspath(os.path.join("tests", "test.
 ENTITY_MAPPING: defaultdict = defaultdict(lambda: "\u25A1", {"&lt;": "<", "&gt;": ">"})
 Hierarchical_URL_SCHEMES: list[str] = ["http", "https", "file"]
 OPAQUE_URL_SCHEMES: list[str] = ["data", "view-source"]
+MAX_REDIRECT_COUNT = 10
 
 
 class URL:
@@ -86,6 +87,7 @@ class URL:
         self,
         use_default_headres: bool = True,
         request_headers: dict[str, str] | None = None,
+        redirect_count: int = 0
     ) -> str:
         """
         Make an HTTP request and return the response body as a string.
@@ -108,6 +110,9 @@ class URL:
             headers_str += "\r\n"
             return headers_str
         
+        if redirect_count > MAX_REDIRECT_COUNT:
+            logger.info("Max redirect reached.")
+            return "Reached max redirect."
         connection_cache: ConnectionCache  = ConnectionCache()
         s : socket.socket | None = connection_cache.get(self.host)
         if s is None:
@@ -135,24 +140,34 @@ class URL:
         version: str
         status: str
         explanation: str
-        version, status, explanation = statusline.decode('utf-8').split(" ", 2)
-        response_headers: dict = {}
-        while True:
-            line: str = response.readline().decode('utf-8')
-            if line == "\r\n":
-                break
-            header: str
-            value: str
-            header, value = line.split(":", 1)
-            response_headers[header] = value.strip()
-        assert "transfer-encoding" not in response_headers
-        assert "content-encoding" not in response_headers
         content: str = ""
-        if 'Content-Length' in response_headers:
-            content = response.read(int(response_headers['Content-Length'])).decode('utf-8')
-        else:
-            content = response.read(int(response_headers['Content-Length'])).decode('utf-8')
-        return content
+        response_headers: dict = {}
+        try:
+            version, status, explanation = statusline.decode('utf-8').split(" ", 2)
+            
+            while True:
+                line: str = response.readline().decode('utf-8')
+                if line == "\r\n":
+                    break
+                header: str
+                value: str
+                header, value = line.split(":", 1)
+                response_headers[header] = value.strip()
+            assert "transfer-encoding" not in response_headers
+            assert "content-encoding" not in response_headers
+            
+            if 'Content-Length' in response_headers:
+                content = response.read(int(response_headers['Content-Length'])).decode('utf-8')
+            else:
+                content = response.read(int(response_headers['Content-Length'])).decode('utf-8')
+            if int(status) >= 300 and int(status) < 400:
+                redirect_url: URL = URL(response_headers['Location'])
+                content = redirect_url._request(use_default_headres=use_default_headres, request_headers=request_headers, redirect_count=redirect_count+1)
+            return content
+        except Exception as e:
+            logger.error(f"Raised exception while parsing response : {e}")
+            return "Check log something went worng"
+
 
     def request(self, use_default_headres: bool = True, request_headers: dict[str, str] | None = None,):
         content: str = ""
@@ -192,8 +207,8 @@ def show(body: str):
         elif not in_tag:
             if body[i] == "&":
                 try:
-                    entitty_ening_index = body.index(";", i)
-                    entity = body[i : entitty_ening_index + 1]
+                    entitty_ening_index: int = body.index(";", i)
+                    entity: str = body[i : entitty_ening_index + 1]
                     print(ENTITY_MAPPING[entity], end="")
                     i = entitty_ening_index + 1
                     continue
