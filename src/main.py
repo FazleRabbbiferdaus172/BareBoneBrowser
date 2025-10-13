@@ -3,13 +3,14 @@ import logging
 import os
 import socket
 import ssl
+from collections import defaultdict
 
 from src.cache.connection_cache import ConnectionCache
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 DEFAULT_FILE_URL: str = "file://" + os.path.abspath(os.path.join("tests", "test.html"))
-ENTITY_MAPPING: dict[str, str] = {"&lt;": "<", "&gt;": ">"}
+ENTITY_MAPPING: defaultdict = defaultdict(lambda: "\u25A1", {"&lt;": "<", "&gt;": ">"})
 Hierarchical_URL_SCHEMES: list[str] = ["http", "https", "file"]
 OPAQUE_URL_SCHEMES: list[str] = ["data", "view-source"]
 
