@@ -1,15 +1,18 @@
 import socket
-from src.utils.singleton import Singleton
+from src.utils.cache import Cache
 
-class ConnectionCache(Singleton):
+
+# Todo: write tests for class
+class ConnectionCache(Cache):
     "A class to cache the socket so that it can be reused"
+
     def init(self):
-        self._connections: dict[str, socket.socket ] = {}
+        self._connections: dict[str, socket.socket] = {}
 
     def get(self, host_name: str):
         return self._connections.get(host_name, None)
-    
-    def set(self, host_name: str, sc : socket.socket):
+
+    def set(self, host_name: str, sc: socket.socket):
         self._connections[host_name] = sc
 
     def _close_socket(self, host_name):
@@ -28,4 +31,3 @@ class ConnectionCache(Singleton):
             del self._connections[host_name]
             return True
         return False
-
