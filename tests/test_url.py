@@ -26,7 +26,7 @@ class TestUrl(unittest.TestCase):
         self.mock_create_default_context.return_value = self.mock_context
 
     def tearDown(self):
-        self.connetction_cache._connections.clear()
+        self.connetction_cache.clear_cache()
 
         self.mock_socket = self.socket_patcher.stop()
         self.mock_create_default_context = self.ssl_create_default_context_patcher.stop()
