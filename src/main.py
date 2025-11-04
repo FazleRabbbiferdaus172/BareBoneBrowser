@@ -6,6 +6,7 @@ import ssl
 from collections import defaultdict
 
 from src.cache.connection_cache import ConnectionCache
+from src.cache.cache_response import cache_response
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -83,6 +84,7 @@ class URL:
         """Process a view-source URL."""
         self.view_source_url = URL(url)
 
+    @cache_response
     def _request(
         self,
         use_default_headres: bool = True,
