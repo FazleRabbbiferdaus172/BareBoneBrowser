@@ -9,6 +9,7 @@ def cache_response(func):
         response = response_cache.get(key)
         if not response:
             response = func(self, *args, **kwargs)
+        # TODO: add support for cache-control headers
         response_cache.set(key, response)
         return response_cache.get(key)
 

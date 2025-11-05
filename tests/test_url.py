@@ -2,7 +2,7 @@ import io
 import unittest
 from unittest.mock import MagicMock, patch
 
-from src.main import URL
+from src.net.url import URL
 from src.cache.connection_cache import ConnectionCache
 
 
