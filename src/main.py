@@ -1,6 +1,8 @@
 import logging
+import tkinter
 
 from src.net.url import URL, ENTITY_MAPPING
+from src.browser.ui import BrowserUI
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -49,4 +51,9 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         load(URL())
     else:
-        load(URL(sys.argv[1]))
+        if sys.argv[1] == "--gui":
+            browser_ui = BrowserUI()
+            browser_ui.load()
+            tkinter.mainloop()
+        else:
+            load(URL(sys.argv[1]))
