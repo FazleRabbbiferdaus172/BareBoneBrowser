@@ -9,5 +9,5 @@ class BrowserUI:
         self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT)
         self.canvas.pack()
 
-    def load(self):
-        self.canvas.create_text(100, 100, text="Hello, BareBoneBrowser!")
+    def load(self, content: str):
+        self.canvas.create_text(100, 100, text=content)
