@@ -1,12 +1,12 @@
 import tkinter
 
 WIDTH, HEIGHT = 800, 600
+HSTEP, VSTEP = 13, 18
 SCROLL_STEP = 100
 
 
 def layout(text: str) -> list[int, int, str]:
     display_list = []
-    HSTEP, VSTEP = 13, 18
     cursor_x, cursor_y = HSTEP, VSTEP
     for c in text:
         display_list.append((cursor_x, cursor_y, c))
@@ -31,6 +31,13 @@ class BrowserUI:
     def draw(self):
         self.clear_canvas()
         for x,y,c in self.display_list:
+            if y > self.scroll + HEIGHT:
+                continue
+            # VSTEP has to be added to y because; y + VSTEP is the 
+            # bottom edge of the character, because characters that are 
+            # halfway inside the viewing window still have to be drawn
+            if y +VSTEP < self.scroll:
+                continue
             self.canvas.create_text(x, y - self.scroll, text=c)
 
     def load(self, content: str):
