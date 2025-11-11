@@ -9,6 +9,10 @@ def layout(text: str) -> list[int, int, str]:
     display_list = []
     cursor_x, cursor_y = HSTEP, VSTEP
     for c in text:
+        # Newline support
+        if c == "\n":
+            cursor_x = HSTEP
+            cursor_y += VSTEP
         display_list.append((cursor_x, cursor_y, c))
         cursor_x += HSTEP
         if cursor_x > WIDTH - HSTEP:
