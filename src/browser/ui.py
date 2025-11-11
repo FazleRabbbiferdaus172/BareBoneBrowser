@@ -1,3 +1,4 @@
+import os
 import tkinter
 
 WIDTH, HEIGHT = 800, 600
@@ -26,8 +27,19 @@ class BrowserUI:
         self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT)
         self.canvas.pack()
         self.scroll = 0
+
+        self.set_title()
+        self.set_scroll_event_callback()
+
+    def set_scroll_event_callback(self):
         self.window.bind("<Down>", self.scrollDown)
         self.window.bind("<Up>", self.scrollUp)
+        if os.name=="posix":
+            self.window.bind("<Button-4>", self.scrollUp)
+            self.window.bind("<Button-5>", self.scrollDown)
+
+    def set_title(self):
+        self.window.title("Bare Bone Browser")
 
     def clear_canvas(self):
         self.canvas.delete("all")
