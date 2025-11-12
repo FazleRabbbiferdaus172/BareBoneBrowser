@@ -54,7 +54,8 @@ class BrowserUI:
             # halfway inside the viewing window still have to be drawn
             if y +VSTEP < self.scroll:
                 continue
-            self.canvas.create_text(x, y - self.scroll, text=c)
+            # anchor "nw" means the position (x,y) is the top-left corner of the text
+            self.canvas.create_text(x, y - self.scroll, text=c, anchor="nw")
 
     def load(self, content: str):
         self.display_list = layout(content)
