@@ -3,6 +3,8 @@ import tkinter
 
 from src.net.url import URL, ENTITY_MAPPING
 from src.browser.ui import BrowserUI
+from src.html.tag import Tag
+from src.html.text import Text
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -12,33 +14,38 @@ logger = logging.getLogger(__name__)
 def lex(body: str) -> str:
     """A very naive HTML renderer that strips out HTML tags and prints the text content."""
     in_tag: bool = False
-    i = 0
+    out: list = []
+    buffer: str = ""
+    entity_buffer: str = ""
     result = ""
-    while i < len(body):
-        if body[i] == "<":
+    in_entity: bool = False
+    
+    for c in body:
+        if c == "<":
             in_tag = True
-        elif body[i] == ">":
+        elif c == ">":
             in_tag = False
         elif not in_tag:
-            if body[i] == "&":
-                try:
-                    entitty_ening_index: int = body.index(";", i)
-                    entity: str = body[i : entitty_ening_index + 1]
-                    result += ENTITY_MAPPING[entity]
-                    i = entitty_ening_index + 1
-                    continue
-                except ValueError:
-                    result += body[i]
+            if c == "&":
+                in_entity = True
+                entity_buffer += c
+            elif c == ";":
+                in_entity = False
+                entity_buffer += c
+                result += ENTITY_MAPPING[entity_buffer]
+                entity_buffer = ""
             else:
-                result += body[i]
-        i += 1
+                if in_entity:
+                    entity_buffer += c
+                else:
+                    result += c
     return result
 
 
 def show(body: str) -> None:
     """Display the body content in the UI."""
     text_content: str = lex(body)
-    print(text_content)
+    print(text_content, end="")
 
 def fetch(url: URL) -> str:
     if url.scheme == "file":
