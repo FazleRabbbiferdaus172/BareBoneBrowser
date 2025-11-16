@@ -13,38 +13,62 @@ logger = logging.getLogger(__name__)
 
 def lex(body: str) -> str:
     """A very naive HTML renderer that strips out HTML tags and prints the text content."""
+    # logger.debug(body)
     in_tag: bool = False
-    out: list = []
+    out: list[Tag | Text] = []
     buffer: str = ""
     entity_buffer: str = ""
-    result = ""
     in_entity: bool = False
     
     for c in body:
         if c == "<":
             in_tag = True
+            if buffer:
+                # when some text like &ltrtre< as there is not ; then is was not entity
+                if entity_buffer and in_entity:
+                    buffer += entity_buffer
+                out.append(Text(buffer))
+            buffer = ""
+            in_entity = False
+            entity_buffer = ""
         elif c == ">":
             in_tag = False
-        elif not in_tag:
+            if buffer:
+                # when some text like &ltrtre> as there is not ; then is was not entity
+                if entity_buffer and in_entity:
+                    buffer += entity_buffer
+                out.append(Tag(buffer))
+            buffer = ""
+            in_entity = False
+            entity_buffer = ""
+        else:
+            # might be enitity 
             if c == "&":
                 in_entity = True
                 entity_buffer += c
-            elif c == ";":
-                in_entity = False
+            elif c == ";" and in_entity:
                 entity_buffer += c
-                result += ENTITY_MAPPING[entity_buffer]
+                buffer += ENTITY_MAPPING[entity_buffer]
+                in_entity = False
                 entity_buffer = ""
+            elif not in_entity:
+                buffer += c
             else:
-                if in_entity:
-                    entity_buffer += c
-                else:
-                    result += c
-    return result
+                entity_buffer += c
+    
+    if not in_tag and buffer:
+        out.append(Text(buffer))
+    elif not in_tag and entity_buffer:
+        out.append(Text(entity_buffer))
+    # logger.debug(out)
+    
+    return out
 
 
 def show(body: str) -> None:
     """Display the body content in the UI."""
-    text_content: str = lex(body)
+    content: str = lex(body)
+    text_content = "".join([t.text for t in content if type(t) is Text])
     print(text_content, end="")
 
 def fetch(url: URL) -> str:
