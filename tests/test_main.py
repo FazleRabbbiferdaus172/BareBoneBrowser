@@ -27,6 +27,15 @@ class TestMain(unittest.TestCase):
         show(content)
         self.assertEqual(mock_stdout.getvalue(), "<<<>>>")
 
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_similer_to_entity_text(self, mock_stdout):
+        content = "&lt"
+        show(content)
+        self.assertEqual(mock_stdout.getvalue(), "&lt")
+        content = "<h1>&lt</h1>"
+        show(content)
+        self.assertEqual(mock_stdout.getvalue(), "&lt")
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
 
