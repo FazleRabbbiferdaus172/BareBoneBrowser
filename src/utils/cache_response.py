@@ -1,7 +1,9 @@
+import functools
 from src.cache.response_cache import ResponseCache
 
 
 def cache_response(func):
+    functools.wraps(func)
     def wrapper(self, *args, **kwargs):
         print("hello from decorator")
         response_cache = ResponseCache()
