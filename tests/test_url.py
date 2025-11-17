@@ -4,11 +4,13 @@ from unittest.mock import MagicMock, patch
 
 from src.net.url import URL
 from src.cache.connection_cache import ConnectionCache
+from src.cache.response_cache import ResponseCache
 
 
 class TestUrl(unittest.TestCase):
     def setUp(self) -> None:
         self.connetction_cache = ConnectionCache()
+        self.response_cache = ResponseCache()
 
         self.socket_patcher = patch("socket.socket")
         self.ssl_create_default_context_patcher = patch("ssl.create_default_context")
@@ -27,6 +29,7 @@ class TestUrl(unittest.TestCase):
 
     def tearDown(self):
         self.connetction_cache.clear_cache()
+        self.response_cache.clear_cache()
 
         self.mock_socket = self.socket_patcher.stop()
         self.mock_create_default_context = self.ssl_create_default_context_patcher.stop()
