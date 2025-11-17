@@ -1,5 +1,5 @@
 import socket
-from src.utils.cache import Cache
+from src.cache.base_cache import Cache
 
 
 # Todo: write tests for class

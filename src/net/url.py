@@ -6,7 +6,7 @@ import ssl
 from collections import defaultdict
 
 from src.cache.connection_cache import ConnectionCache
-from src.cache.cache_response import cache_response
+from src.utils.cache_response import cache_response
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -84,7 +84,6 @@ class URL:
         """Process a view-source URL."""
         self.view_source_url = URL(url)
 
-    # FIX: test is breaking because of this decorator
     @cache_response
     def _request(
         self,

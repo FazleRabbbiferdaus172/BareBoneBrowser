@@ -1,4 +1,4 @@
-from src.utils.cache import Cache
+from src.cache.base_cache import Cache
 
 
 class ResponseCache(Cache):
