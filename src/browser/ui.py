@@ -2,26 +2,30 @@ import os
 import tkinter
 import tkinter.font
 
+from src.html.text import Text
+
 WIDTH, HEIGHT = 800, 600
 HSTEP, VSTEP = 13, 18
 SCROLL_STEP = 100
 
 
-def layout(text: str) -> list[int, int, str]:
+def layout(tokens: list) -> list[int, int, str]:
     font = tkinter.font.Font()
     display_list = []
     cursor_x, cursor_y = HSTEP, VSTEP
-    for word in text.split():
-        w = font.measure(word)
-        # Newline support
-        if w == "\n":
-            cursor_x = HSTEP
-            cursor_y += VSTEP
-        display_list.append((cursor_x, cursor_y, word))
-        cursor_x += w + font.measure(" ")
-        if cursor_x + w > WIDTH - HSTEP:
-            cursor_x = HSTEP
-            cursor_y += font.metrics("linespace") * 1.25
+    for token in tokens:
+        if isinstance(token, Text):
+            for word in token.text.split():
+                w = font.measure(word)
+                # Newline support
+                if w == "\n":
+                    cursor_x = HSTEP
+                    cursor_y += VSTEP
+                display_list.append((cursor_x, cursor_y, word))
+                cursor_x += w + font.measure(" ")
+                if cursor_x + w > WIDTH - HSTEP:
+                    cursor_x = HSTEP
+                    cursor_y += font.metrics("linespace") * 1.25
     return display_list
 
 class BrowserUI:
@@ -60,8 +64,8 @@ class BrowserUI:
             # anchor "nw" means the position (x,y) is the top-left corner of the text
             self.canvas.create_text(x, y - self.scroll, text=c, anchor="nw")
 
-    def load(self, content: str):
-        self.display_list = layout(content)
+    def load(self, tokens: str):
+        self.display_list = layout(tokens)
         self.draw()
 
     def scrollDown(self, e):
