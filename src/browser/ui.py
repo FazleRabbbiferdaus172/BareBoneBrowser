@@ -8,14 +8,19 @@ WIDTH, HEIGHT = 800, 600
 HSTEP, VSTEP = 13, 18
 SCROLL_STEP = 100
 
-
 def layout(tokens: list) -> list[int, int, str]:
-    font = tkinter.font.Font()
+    weight = 'normal'
+    style = 'roman'
     display_list = []
     cursor_x, cursor_y = HSTEP, VSTEP
     for token in tokens:
         if isinstance(token, Text):
             for word in token.text.split():
+                font = tkinter.font.Font(
+                    size=16,
+                    weight=weight,
+                    slant=style
+                )
                 w = font.measure(word)
                 # Newline support
                 if w == "\n":
@@ -26,6 +31,15 @@ def layout(tokens: list) -> list[int, int, str]:
                 if cursor_x + w > WIDTH - HSTEP:
                     cursor_x = HSTEP
                     cursor_y += font.metrics("linespace") * 1.25
+        elif token.tag == "i":
+            style = "italic"
+        elif token.tag == "/i":
+            style = "roman"
+        elif token.tag == "b":
+            weight = "bold"
+        elif token.tag == "/b":
+            weight = "normal"
+
     return display_list
 
 class BrowserUI:
