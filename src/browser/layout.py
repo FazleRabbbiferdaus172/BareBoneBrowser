@@ -11,6 +11,7 @@ class Layout:
     def __init__(self, tokens):
         self.weight = "normal"
         self.style = "roman"
+        self.size = 12
         self.display_list = []
         self.cursor_x = HSTEP
         self.cursor_y = VSTEP
@@ -31,9 +32,18 @@ class Layout:
             self.weight = "bold"
         elif token.tag == "/b":
             self.weight = "normal"
+        elif token.tag == "small":
+            self.size -= 2
+        elif token.tag == "/small":
+            self.size += 2
+        elif token.tag == "big":
+            self.size += 4
+        elif token.tag == "/big":
+            self.size -= 4
+        
 
     def process_word(self, word):
-        font = tkinter.font.Font(size=16, weight=self.weight, slant=self.style)
+        font = tkinter.font.Font(size=self.size, weight=self.weight, slant=self.style)
         w = font.measure(word)
         # Newline support
         if w == "\n":
