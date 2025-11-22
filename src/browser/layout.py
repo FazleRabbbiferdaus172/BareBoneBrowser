@@ -16,6 +16,7 @@ class Layout:
         self.cursor_x = HSTEP
         self.cursor_y = VSTEP
         self.display_list = []
+        self.line = []
 
         for token in tokens:
             self.process_token(token)
@@ -54,6 +55,7 @@ class Layout:
         if self.cursor_x + w > WIDTH - HSTEP:
             self.cursor_x = HSTEP
             self.cursor_y += font.metrics("linespace") * 1.25
+        self.line.append((self.cursor_x, word, font))
     
     def get_display_list(self):
         return self.display_list
