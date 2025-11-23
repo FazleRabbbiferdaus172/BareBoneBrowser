@@ -20,6 +20,7 @@ class Layout:
 
         for token in tokens:
             self.process_token(token)
+        return
 
     def process_token(self, token):
         if isinstance(token, Text):
@@ -55,7 +56,11 @@ class Layout:
         if self.cursor_x + w > WIDTH - HSTEP:
             self.cursor_x = HSTEP
             self.cursor_y += font.metrics("linespace") * 1.25
+            self.flush()
         self.line.append((self.cursor_x, word, font))
     
     def get_display_list(self):
         return self.display_list
+    
+    def flush(self):
+        return
