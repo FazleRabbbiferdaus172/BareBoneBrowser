@@ -63,4 +63,11 @@ class Layout:
         return self.display_list
     
     def flush(self):
-        return
+        if not self.line:
+            return
+        metrices = [font.metrics() for _, _, font in self.line]
+        max_ascent = max(m['ascent'] for m in metrices)
+        baseline = self.cursor_y + 1.25 * max_ascent
+        for i, (x, word, font) in enumerate(self.line):
+            y = baseline - font.metrics('ascent')
+            self.display_list.append((x, y, word, font))
