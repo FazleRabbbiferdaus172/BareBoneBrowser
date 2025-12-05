@@ -20,7 +20,8 @@ class Layout:
 
         for token in tokens:
             self.process_token(token)
-        return
+        self.flush()
+
 
     def process_token(self, token):
         if isinstance(token, Text):
@@ -68,6 +69,6 @@ class Layout:
         metrices = [font.metrics() for _, _, font in self.line]
         max_ascent = max(m['ascent'] for m in metrices)
         baseline = self.cursor_y + 1.25 * max_ascent
-        for i, (x, word, font) in enumerate(self.line):
+        for x, word, font in self.line:
             y = baseline - font.metrics('ascent')
             self.display_list.append((x, y, word, font))
