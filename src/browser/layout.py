@@ -20,7 +20,8 @@ class Layout:
 
         for token in tokens:
             self.process_token(token)
-        self.flush()
+        # Todo: Fix flush or make support for font
+        # self.flush()
 
 
     def process_token(self, token):
