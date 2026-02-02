@@ -21,7 +21,7 @@ class Layout:
         for token in tokens:
             self.process_token(token)
         # Todo: Fix flush or make support for font
-        # self.flush()
+        self.flush()
 
 
     def process_token(self, token):
@@ -44,6 +44,11 @@ class Layout:
             self.size += 4
         elif token.tag == "/big":
             self.size -= 4
+        elif token.tag == "br":
+            self.flush()
+        elif token.tag == "/p":
+            self.flush()
+            self.cursor_y += VSTEP
         
 
     def process_word(self, word):
@@ -53,7 +58,7 @@ class Layout:
         if w == "\n":
             self.cursor_x = HSTEP
             self.cursor_y += VSTEP
-        self.display_list.append((self.cursor_x, self.cursor_y, word))
+        # self.display_list.append((self.cursor_x, self.cursor_y, word))
         self.cursor_x += w + font.measure(" ")
         if self.cursor_x + w > WIDTH - HSTEP:
             self.cursor_x = HSTEP
@@ -73,3 +78,7 @@ class Layout:
         for x, word, font in self.line:
             y = baseline - font.metrics('ascent')
             self.display_list.append((x, y, word, font))
+        max_descent = max(metric["descent"] for metric in metrices)
+        self.cursor_y = baseline + 1.25 * max_descent
+        self.cursor_x = HSTEP
+        self.line = []

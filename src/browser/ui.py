@@ -32,7 +32,7 @@ class BrowserUI:
 
     def draw(self):
         self.clear_canvas()
-        for x,y,c in self.display_list:
+        for x,y,c, font in self.display_list:
             if y > self.scroll + HEIGHT:
                 continue
             # VSTEP has to be added to y because; y + VSTEP is the 
@@ -41,7 +41,7 @@ class BrowserUI:
             if y +VSTEP < self.scroll:
                 continue
             # anchor "nw" means the position (x,y) is the top-left corner of the text
-            self.canvas.create_text(x, y - self.scroll, text=c, anchor="nw")
+            self.canvas.create_text(x, y - self.scroll, text=c, font=font,anchor="nw")
 
     def load(self, tokens: str):
         self.display_list = Layout(tokens).get_display_list()
