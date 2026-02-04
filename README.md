@@ -12,4 +12,5 @@ this is a toy browser from the book "web browser enginnering"
 ### Untouched
 - 1.9
 
-- fix different font size spacing 
+- fix different font size spacing
+- fix space after line end
