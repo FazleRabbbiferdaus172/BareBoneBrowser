@@ -14,3 +14,4 @@ this is a toy browser from the book "web browser enginnering"
 
 - fix different font size spacing
 - fix space after line end
+- fix test cases
