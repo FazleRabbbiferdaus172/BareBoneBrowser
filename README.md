@@ -16,3 +16,4 @@ this is a toy browser from the book "web browser enginnering"
 - fix space after line end
 - fix test cases
 - fix ui
+- fix cache
