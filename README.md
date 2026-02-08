@@ -17,3 +17,4 @@ this is a toy browser from the book "web browser enginnering"
 - fix test cases
 - fix ui
 - fix cache
+- fix token parser
