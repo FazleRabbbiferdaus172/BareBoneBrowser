@@ -54,17 +54,18 @@ class Layout:
     def process_word(self, word):
         font = tkinter.font.Font(size=self.size, weight=self.weight, slant=self.style)
         w = font.measure(word)
+        ending_space = font.measure(" ")
+
         # Newline support
         if w == "\n":
             self.cursor_x = HSTEP
             self.cursor_y += VSTEP
-        # self.display_list.append((self.cursor_x, self.cursor_y, word))
-        self.cursor_x += w + font.measure(" ")
+        self.line.append((self.cursor_x, word, font))
+        self.cursor_x += w + ending_space
         if self.cursor_x + w > WIDTH - HSTEP:
             self.cursor_x = HSTEP
             self.cursor_y += font.metrics("linespace") * 1.25
             self.flush()
-        self.line.append((self.cursor_x, word, font))
     
     def get_display_list(self):
         return self.display_list
