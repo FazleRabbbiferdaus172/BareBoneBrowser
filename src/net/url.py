@@ -163,9 +163,15 @@ class URL:
                     "utf-8"
                 )
             else:
-                content = response.read(int(response_headers["Content-Length"])).decode(
-                    "utf-8"
-                )
+                content = ''
+                while True:
+                    content_frac = response.readline().decode(
+                        "utf-8"
+                        )
+                    if content_frac == "\r\n" or content_frac == "":
+                        break
+                    content += content_frac
+
             if int(status) >= 300 and int(status) < 400:
                 redirect_url: URL = URL(response_headers["Location"])
                 content = redirect_url._request(
