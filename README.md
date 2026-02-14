@@ -14,7 +14,7 @@ this is a toy browser from the book "web browser enginnering"
 
 - implement font cache
 - fix different font size spacing (fixed)
-- fix space after line end
+- fix space after line end (fixed)
 - fix test cases
 - fix ui
 - fix cache
