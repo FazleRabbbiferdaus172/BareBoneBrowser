@@ -19,3 +19,4 @@ this is a toy browser from the book "web browser enginnering"
 - fix ui
 - fix cache
 - fix token parser
+- start text size calculation
