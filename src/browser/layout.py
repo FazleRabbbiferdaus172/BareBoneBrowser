@@ -1,6 +1,7 @@
 import tkinter
 import tkinter.font
 from src.html.text import Text
+from src.cache.font_cache import FontCache
 
 WIDTH, HEIGHT = 800, 600
 HSTEP, VSTEP = 13, 18
@@ -17,6 +18,7 @@ class Layout:
         self.cursor_y = VSTEP
         self.display_list = []
         self.line = []
+        self.font_cache = FontCache()
 
         for token in tokens:
             self.process_token(token)
@@ -52,7 +54,7 @@ class Layout:
         
 
     def process_word(self, word):
-        font = tkinter.font.Font(size=self.size, weight=self.weight, slant=self.style)
+        font = self.font_cache.get(size=self.size, weight=self.weight, style=self.style)
         w = font.measure(word)
         ending_space = font.measure(" ")
 
