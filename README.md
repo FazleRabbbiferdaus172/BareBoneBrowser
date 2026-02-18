@@ -17,6 +17,6 @@ this is a toy browser from the book "web browser enginnering"
 - fix space after line end (fixed)
 - fix test cases
 - fix ui
-- fix cache
+- fix cache (fixed)
 - fix token parser (fixed)
 - start text size calculation
