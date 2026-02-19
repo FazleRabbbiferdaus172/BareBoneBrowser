@@ -20,3 +20,4 @@ this is a toy browser from the book "web browser enginnering"
 - fix cache (fixed)
 - fix token parser (fixed)
 - start text size calculation
+- support for other tect style tags
