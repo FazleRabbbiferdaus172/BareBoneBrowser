@@ -16,7 +16,7 @@ this is a toy browser from the book "web browser enginnering"
 - fix different font size spacing (fixed)
 - fix space after line end (fixed)
 - fix test cases
-- fix ui
+- fix ui (fixed)
 - fix cache (fixed)
 - fix token parser (fixed)
 - start text size calculation
