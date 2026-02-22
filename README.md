@@ -12,7 +12,6 @@ this is a toy browser from the book "web browser enginnering"
 ### Untouched
 - 1.9
 
-- implement font cache (implemented)
 - fix different font size spacing (fixed)
 - fix space after line end (fixed)
 - fix test cases
