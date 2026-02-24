@@ -18,7 +18,7 @@ this is a toy browser from the book "web browser enginnering"
 - fix ui (fixed)
 - fix cache (fixed)
 - fix token parser (fixed)
-- start text size calculation
+- start text size calculation (fixed)
 - support for other text style tags
 - implement tree nodes
 - refactor Text class
