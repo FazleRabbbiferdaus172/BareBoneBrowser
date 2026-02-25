@@ -21,3 +21,4 @@ this is a toy browser from the book "web browser enginnering"
 - start text size calculation
 - support for other text style tags
 - implement tree nodes
+- refactor Text class
