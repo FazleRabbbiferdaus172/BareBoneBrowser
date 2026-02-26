@@ -22,3 +22,4 @@ this is a toy browser from the book "web browser enginnering"
 - support for other text style tags
 - implement tree nodes
 - refactor Text class
+- Refactor Tag class to element class
