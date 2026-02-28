@@ -24,3 +24,4 @@ this is a toy browser from the book "web browser enginnering"
 - refactor Text class
 - Refactor Tag class to element class
 - Add children property to both Text and Element class
+- Implement HTMLParser
