@@ -1,5 +1,5 @@
-class Tag:
-    def __init__(self, tag):
+class Element:
+    def __init__(self, tag, parent=None):
         self.tag = tag
 
     def __str__(self):
