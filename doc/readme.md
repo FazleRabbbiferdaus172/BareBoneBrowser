@@ -10,4 +10,4 @@ or
 
 
 ### Setup git hooks
-`git config core.hooksPath .githooks`
+`git config core.hooksPath .githook`
