@@ -1,0 +1,30 @@
+#!/bin/sh
+
+echo "Running pre-push hook..."
+echo "Running tests..."
+
+uv run -m unittest -v
+
+if [ $? -ne 0 ]; then
+    echo "\n Tests failed!"
+    
+    exec < /dev/tty
+    
+    while true; do
+        read -p "Do you want to proceed anyway? (y/n): " yn
+        case $yn in
+            [Yy]* ) 
+                echo "Proceeding despite failures..."
+                exit 0
+                ;;
+            [Nn]* ) 
+                echo "Action aborted by user."
+                exit 1
+                ;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    done
+fi
+
+echo "Tests passed. Proceeding..."
+exit 0
