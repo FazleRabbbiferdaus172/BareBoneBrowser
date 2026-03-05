@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-def lex(body: str) -> list[Tag | Text]:
+def lex(body: str) -> list[Element | Text]:
     """A very naive HTML renderer that parses html response and returns a list of tokens."""
     # logger.debug(body)
     in_tag: bool = False
