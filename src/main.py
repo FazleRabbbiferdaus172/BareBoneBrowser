@@ -3,7 +3,7 @@ import tkinter
 
 from src.net.url import URL, ENTITY_MAPPING
 from src.browser.ui import BrowserUI
-from src.html.tag import Tag
+from src.html.tag import Element 
 from src.html.text import Text
 
 
@@ -15,7 +15,7 @@ def lex(body: str) -> list[Element | Text]:
     """A very naive HTML renderer that parses html response and returns a list of tokens."""
     # logger.debug(body)
     in_tag: bool = False
-    out: list[Tag | Text] = []
+    out: list[Element | Text] = []
     buffer: str = ""
     entity_buffer: str = ""
     in_entity: bool = False
@@ -37,7 +37,7 @@ def lex(body: str) -> list[Element | Text]:
                 # when some text like &ltrtre> as there is not ; then is was not entity
                 if entity_buffer and in_entity:
                     buffer += entity_buffer
-                out.append(Tag(buffer))
+                out.append(Element(buffer))
             buffer = ""
             in_entity = False
             entity_buffer = ""
