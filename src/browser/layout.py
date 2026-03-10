@@ -8,7 +8,7 @@ HSTEP, VSTEP = 13, 18
 SCROLL_STEP = 100
 
 
-class Layout:
+class BlockLayout:
     def __init__(self, tokens):
         self.weight = "normal"
         self.style = "roman"
