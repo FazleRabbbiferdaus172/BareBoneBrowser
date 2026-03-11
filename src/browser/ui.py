@@ -1,7 +1,7 @@
 import os
 import tkinter
 
-from src.browser.layout import Layout
+from src.browser.layout import BlockLayout 
 
 WIDTH, HEIGHT = 800, 600
 HSTEP, VSTEP = 13, 18
@@ -44,7 +44,7 @@ class BrowserUI:
             self.canvas.create_text(x , y - self.scroll, text=c, font=font, anchor="nw")
 
     def load(self, tokens: str):
-        self.display_list = Layout(tokens).get_display_list()
+        self.display_list = BlockLayout(tokens).get_display_list()
         self.draw()
 
     def scrollDown(self, e):
