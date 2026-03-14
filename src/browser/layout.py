@@ -25,7 +25,6 @@ class BlockLayout:
         # Todo: Fix flush or make support for font
         self.flush()
 
-
     def process_token(self, token):
         if isinstance(token, Text):
             for word in token.text.split():
@@ -51,7 +50,6 @@ class BlockLayout:
         elif token.tag == "/p":
             self.flush()
             self.cursor_y += VSTEP
-        
 
     def process_word(self, word):
         font = self.font_cache.get(size=self.size, weight=self.weight, style=self.style)
@@ -85,3 +83,10 @@ class BlockLayout:
         self.cursor_y = baseline + 1.25 * max_descent
         self.cursor_x = HSTEP
         self.line = []
+    
+    def layout_intermediate(self):
+        previous = None
+        for child in self.node.children:
+            next = BlockLayout(child, previous)
+            self.children.append(next)
+            previous = next
